@@ -35,6 +35,13 @@ model Organization {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   name      String
+  line1     String?
+  line2     String?
+  city      String?
+  state     String?
+  zip       String?
+  phone     String?
+  email     String?
   users     User[]
   clients   Client[]
 
@@ -156,15 +163,18 @@ model Upload {
 }
 
 model Job {
-  id          String   @id @default(uuid())
-  type        String
-  data        String // JSON stringified data
-  status      String // pending, processing, completed, failed
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  attempts    Int      @default(0)
-  maxAttempts Int      @default(3)
-  error       String?
+  id             String   @id @default(uuid())
+  type           String
+  data           String // JSON stringified data
+  status         String // pending, processing, completed, failed
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  attempts       Int      @default(0)
+  maxAttempts    Int      @default(3)
+  error          String?
+  blockedByJobId String?
+  blockedByJob   Job?     @relation("BlockedBy", fields: [blockedByJobId], references: [id])
+  blocks         Job[]    @relation("BlockedBy")
 
   @@map("jobs")
 }
@@ -186,6 +196,12 @@ model Client {
   name         String
   email        String?
   company      String?
+  line1        String?
+  line2        String?
+  city         String?
+  state        String?
+  zip          String?
+  phone        String?
   hourlyRate   Decimal?
   timeEntries  TimeEntry[]
   invoices     Invoice[]
@@ -222,8 +238,8 @@ model Invoice {
   clientId    String
   client      Client      @relation(fields: [clientId], references: [id], onDelete: Cascade)
   timeEntries TimeEntry[]
-  total       Decimal
-  notes       String?
+  tax         Decimal?
+  discount    Decimal?
 
   @@map("invoices")
 }

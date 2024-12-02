@@ -4,13 +4,7 @@ import { useField } from 'remix-validated-form'
 import { cn } from '#app/utils/misc'
 import { startCase } from '#app/utils/startCase'
 import { InfoCircledIcon } from '../icons'
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from '../ui/select'
+
 import { Tooltip } from '../ui/tooltip'
 
 interface Props extends ComponentPropsWithoutRef<typeof Root> {
@@ -56,39 +50,33 @@ export function FormSelect({
 			) : hideLabel ? null : (
 				<label htmlFor={id}>{label ?? startCase(name)}</label>
 			)}
-			<Select
+			<select
 				value={props.value?.toString()}
 				defaultValue={props.defaultValue?.toString()}
 				dir="ltr"
+				className={cn(
+					'w-full rounded-md border p-2 text-sm shadow-sm',
+					error && 'border-destructive',
+					className,
+				)}
 				aria-invalid={errorId ? true : undefined}
 				aria-describedby={errorId}
 				{...getInputProps({ id, ...props })}
 			>
-				<SelectTrigger
-					className={cn(error && 'border-destructive')}
-					type="button"
-				>
-					<div className="flex items-center gap-1 text-lg">
-						{prefix}
-						<SelectValue placeholder={placeholder ?? 'Select'} />
-					</div>
-				</SelectTrigger>
-				<SelectContent side="top">
-					{props.options.map(opt => (
-						<SelectItem
-							key={opt.value}
-							value={opt.value.toString()}
-							onClick={e => {
-								e.preventDefault()
-								e.stopPropagation()
-							}}
-							className="text-lg"
-						>
-							{opt.label}
-						</SelectItem>
-					))}
-				</SelectContent>
-			</Select>
+				{props.options.map(opt => (
+					<option
+						key={opt.value}
+						value={opt.value.toString()}
+						onClick={e => {
+							e.preventDefault()
+							e.stopPropagation()
+						}}
+						className="text-lg"
+					>
+						{opt.label}
+					</option>
+				))}
+			</select>
 			{helperText ? (
 				<p className="text-xs text-muted-foreground">{helperText}</p>
 			) : null}

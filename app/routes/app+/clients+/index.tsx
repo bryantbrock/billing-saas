@@ -13,7 +13,6 @@ import {
 	SheetContent,
 	SheetFooter,
 	SheetHeader,
-	SheetTitle,
 	SheetTrigger,
 } from '#app/components/ui/sheet'
 import {
@@ -56,6 +55,12 @@ const validator = withZod(
 		name: z.string().min(1, 'Name is required'),
 		email: z.string().nullish(),
 		hourlyRate: z.string().nullish(),
+		line1: z.string().nullish(),
+		line2: z.string().nullish(),
+		city: z.string().nullish(),
+		state: z.string().nullish(),
+		zip: z.string().nullish(),
+		phone: z.string().nullish(),
 	}),
 )
 
@@ -64,26 +69,26 @@ export async function action({ request }: ActionFunctionArgs) {
 	const formData = await request.formData()
 	const { data, error } = await validator.validate(formData)
 	if (error) return validationError(error)
-	const client = await prisma.client.create({
+	await prisma.client.create({
 		data: {
 			...data,
 			hourlyRate: data.hourlyRate ? Number(data.hourlyRate) : null,
 			organization: { connect: { id: orgId! } },
 		},
 	})
-	return json({ client })
+	return json({ created: true })
 }
 
 export default function Route() {
 	const { clients } = useLoaderData<typeof loader>()
 	const [addClientOpen, setAddClientOpen] = useState(false)
-	const createClient = useFetcher()
+	const createClient = useFetcher<{ created: boolean }>()
 	const isCreatingClient = createClient.state !== 'idle'
 	const navigate = useNavigate()
 
 	useEffect(() => {
-		if (createClient.state === 'idle') setAddClientOpen(false)
-	}, [createClient.state])
+		if (createClient.data?.created) setAddClientOpen(false)
+	}, [createClient.data?.created, createClient.state])
 
 	return (
 		<div className="w-full rounded-md bg-white p-4 shadow">
@@ -91,30 +96,39 @@ export default function Route() {
 				<h2 className="text-xl font-bold">Clients</h2>
 				<Sheet open={addClientOpen} onOpenChange={setAddClientOpen}>
 					<SheetTrigger asChild>
-						<Button variant="outline">
+						<Button>
 							<PlusIcon className="mr-2" size={16} /> New Client
 						</Button>
 					</SheetTrigger>
 					<SheetContent>
-						<SheetHeader>
-							<SheetTitle> New Client</SheetTitle>
-						</SheetHeader>
+						<SheetHeader>New Client</SheetHeader>
 						<ValidatedForm
 							method="post"
-							className="flex flex-1 flex-col"
+							className="flex flex-1 flex-col overflow-hidden"
 							validator={validator}
 							fetcher={createClient}
 						>
-							<div className="flex flex-1 flex-col gap-4 p-4">
-								<FormInput name="name" placeholder="Name" />
-								<FormInput name="email" placeholder="Email" type="email" />
-								<FormInput
-									name="hourlyRate"
-									type="number"
-									min="0"
-									step="0.01"
-									placeholder="Hourly Rate"
-								/>
+							<div className="flex flex-1 flex-col gap-4 overflow-y-scroll p-4">
+								<div className="flex gap-2">
+									<FormInput name="name" label="Name" className="w-full" />
+									<FormInput name="email" label="Email" className="w-full" />
+								</div>
+								<div className="flex gap-2">
+									<FormInput name="phone" label="Phone" className="w-full" />
+									<FormInput
+										name="hourlyRate"
+										label="Hourly Rate"
+										type="number"
+										className="w-full"
+									/>
+								</div>
+								<FormInput name="line1" label="Address Line 1" />
+								<FormInput name="line2" label="Address Line 2" />
+								<div className="flex gap-2">
+									<FormInput name="city" label="City" className="w-full" />
+									<FormInput name="state" label="State" className="w-full" />
+								</div>
+								<FormInput name="zip" label="ZIP Code" />
 							</div>
 							<SheetFooter>
 								<SheetClose asChild>

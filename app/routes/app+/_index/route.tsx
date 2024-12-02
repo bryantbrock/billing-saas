@@ -241,11 +241,18 @@ export default function TimePage() {
 				</div>
 
 				<div className="flex w-full gap-3">
-					<Button variant="outline" className="h-40 w-full text-xl" size="lg">
-						<div className="flex flex-col items-center gap-4">
-							<div className="text-4xl">📧</div>
-							<div>Send Invoice</div>
-						</div>
+					<Button
+						variant="outline"
+						className="h-40 w-full text-xl"
+						size="lg"
+						asChild
+					>
+						<Link to="/app/invoices/new">
+							<div className="flex flex-col items-center gap-4">
+								<div className="text-4xl">📧</div>
+								<div>Create Invoice</div>
+							</div>
+						</Link>
 					</Button>
 
 					<Button variant="outline" className="h-40 w-full text-xl" size="lg">
